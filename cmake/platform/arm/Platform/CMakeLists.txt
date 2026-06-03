@@ -3,6 +3,7 @@
 #
 # This file defines a configuration module for arm platforms.
 ####
+
 register_fprime_config(
     AUTOCODER_INPUTS
         "${CMAKE_CURRENT_LIST_DIR}/PlatformTypes.fpp"
@@ -18,5 +19,6 @@ register_fprime_config(
         Os_Console_Arduino
         Os_RawTime_Arduino
         Fw_StringFormat_snprintf
+        Fw_StringScan_sscanf
     INTERFACE # No buildable files generated
 )

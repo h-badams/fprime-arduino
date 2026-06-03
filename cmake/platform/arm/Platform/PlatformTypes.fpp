@@ -33,3 +33,8 @@ type PlatformTaskIdType = I32
 @ The type of queue priorities used. Supplied by platform,
 @ overridable by project.
 type PlatformQueuePriorityType = I32
+
+# FW_FILE_HANDLE_MAX_SIZE and FW_DIRECTORY_HANDLE_MAX_SIZE removed from here.
+# As of fprime v4.2.x these constants live in PlatformCfg.fpp (default/config/).
+# The project overrides them to 64 in config/PlatformCfg.fpp to accommodate
+# ArduinoFileHandle / ArduinoDirectoryHandle (~40 bytes each).
