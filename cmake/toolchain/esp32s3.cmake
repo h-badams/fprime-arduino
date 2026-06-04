@@ -14,6 +14,12 @@ set(CMAKE_CROSSCOMPILING 1)
 set(FPRIME_PLATFORM "ArduinoFw")
 set(FPRIME_USE_BAREMETAL_SCHEDULER ON)
 
+# Marker consumed by board-gated code in the shared fprime-arduino tree
+# (e.g. Arduino/Os/CMakeLists.txt). Other toolchains (e.g. FeatherM4_FreeRTOS)
+# leave this unset so ESP32-only build steps are skipped. The matching
+# compile-time gate is ARDUINO_ARCH_ESP32, defined by the ESP32 Arduino core.
+set(FPRIME_ARDUINO_CORE_ESP32 ON CACHE BOOL "Building against the ESP32 Arduino core")
+
 # Prevent test program compiling
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)

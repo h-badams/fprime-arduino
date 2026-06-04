@@ -13,8 +13,10 @@ ArduinoFile::~ArduinoFile() {
 }
 
 ArduinoFile::Status ArduinoFile::open(const char* filepath, ArduinoFile::Mode open_mode, OverwriteType overwrite) {
-    // The ESP32 Arduino core's fs::FS::open() takes a POSIX-style mode *string*
-    // ("r"/"w"/"a"), not the integer O_* flags used by the SdFat-based cores.
+#if defined(ARDUINO_ARCH_ESP32)
+    // ESP32 core: fs::FS::open() takes a POSIX-style mode *string* ("r"/"w"/"a"),
+    // not the integer O_* flags used by the SdFat-based cores. On this core
+    // FILE_READ/FILE_WRITE/FILE_APPEND are themselves the mode strings.
     // Map the F' open mode onto the closest available string mode. The "create"
     // argument requests creation of the file/parent path when it does not exist.
     const char* mode = FILE_READ;
@@ -42,6 +44,34 @@ ArduinoFile::Status ArduinoFile::open(const char* filepath, ArduinoFile::Mode op
     }
 
     this->m_handle.m_fd = SD.open(filepath, mode, create);
+#else
+    // SdFat-based cores (e.g. Adafruit SAMD / Feather M4): SD.open() takes
+    // integer O_* flags, and FILE_READ/FILE_WRITE are integer constants.
+    PlatformIntType flags = 0;
+
+    switch (open_mode) {
+        case OPEN_READ:
+            flags = O_RDONLY;
+            break;
+        case OPEN_WRITE:
+            flags = O_WRONLY | O_CREAT;
+            break;
+        case OPEN_SYNC_WRITE:
+            flags = O_WRONLY | O_CREAT | O_SYNC;
+            break;
+        case OPEN_CREATE:
+            flags = O_WRONLY | O_CREAT | O_TRUNC | ((overwrite == ArduinoFile::OverwriteType::OVERWRITE) ? 0 : O_EXCL);
+            break;
+        case OPEN_APPEND:
+            flags = FILE_WRITE;
+            break;
+        default:
+            FW_ASSERT(0, open_mode);
+            break;
+    }
+
+    this->m_handle.m_fd = SD.open(filepath, flags);
+#endif
 
     if (!this->m_handle.m_fd) {
         return Status::OTHER_ERROR;
